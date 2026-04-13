@@ -35,8 +35,11 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 .baby-name{font-family:'Baloo 2',cursive;font-size:20px;font-weight:700;text-shadow:0 1px 6px rgba(0,0,0,0.08)}
 .baby-age{font-size:12px;font-weight:600;opacity:0.85}
 .quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-top:-8px;position:relative;z-index:2}
-.qa-btn{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--white);border-radius:var(--r);padding:14px 6px;border:none;cursor:pointer;box-shadow:0 3px 14px var(--shadow);transition:all 0.2s;font-family:'Nunito',sans-serif}
+.qa-btn{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--white);border-radius:var(--r);padding:14px 6px;border:none;cursor:pointer;box-shadow:0 3px 14px var(--shadow);transition:all 0.2s;font-family:'Nunito',sans-serif;position:relative}
 .qa-btn:active{transform:scale(0.93)}.qa-icon{font-size:28px;line-height:1}.qa-label{font-size:11px;font-weight:700;color:var(--text-mid)}
+.qa-btn.sleeping{background:var(--lav);animation:sleepPulse 2s infinite}
+@keyframes sleepPulse{0%,100%{box-shadow:0 3px 14px var(--shadow)}50%{box-shadow:0 3px 20px rgba(155,127,230,0.3)}}
+.qa-timer{font-size:10px;font-weight:800;color:var(--lav-dark);position:absolute;bottom:4px}
 .stats{display:flex;gap:8px;padding:14px 16px 4px;overflow-x:auto;scrollbar-width:none}.stats::-webkit-scrollbar{display:none}
 .stat-card{flex:1;min-width:0;background:var(--white);border-radius:16px;padding:12px 10px;box-shadow:0 2px 10px var(--shadow);text-align:center}
 .stat-val{font-family:'Baloo 2',cursive;font-size:22px;font-weight:800;line-height:1}
@@ -45,6 +48,17 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 .last-entry.hidden{display:none}.le-icon{font-size:24px}.le-body{flex:1;min-width:0}
 .le-title{font-size:12px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.3px}
 .le-text{font-size:14px;font-weight:700;margin-top:1px}.le-sub{font-size:11px;color:var(--text-mid);font-weight:600}
+/* Sleep banner */
+.sleep-banner{margin:14px 16px 0;padding:16px;background:linear-gradient(135deg,var(--lav-dark),var(--lav));border-radius:var(--r);box-shadow:0 4px 16px rgba(155,127,230,0.3);display:flex;align-items:center;gap:14px;color:white;animation:fadeIn 0.3s ease}
+.sleep-banner.hidden{display:none}
+.sleep-banner-icon{font-size:36px;animation:sleepZ 2s infinite}
+@keyframes sleepZ{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.sleep-banner-body{flex:1}
+.sleep-banner-title{font-size:13px;font-weight:700;opacity:0.85}
+.sleep-banner-timer{font-family:'Baloo 2',cursive;font-size:28px;font-weight:800}
+.sleep-banner-start{font-size:11px;opacity:0.7}
+.sleep-stop-btn{padding:10px 18px;border:none;border-radius:14px;background:white;color:var(--lav-dark);font-family:'Baloo 2',cursive;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.sleep-stop-btn:active{transform:scale(0.95)}
 .section-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 8px}
 .section-title{font-family:'Baloo 2',cursive;font-size:18px;font-weight:700}
 .head-right{display:flex;align-items:center;gap:8px}
@@ -111,44 +125,40 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 <body>
 <div class="app">
 <div class="onboarding" id="onboarding">
-  <div class="ob-card">
-    <div class="ob-emoji">👶</div>
-    <div class="ob-title">BébéTrack</div>
+  <div class="ob-card"><div class="ob-emoji">👶</div><div class="ob-title">BébéTrack</div>
     <div class="ob-sub">Suivez ensemble les biberons, couches et dodos de bébé.<br><br>Qui êtes-vous ?</div>
-    <div class="ob-buttons">
-      <button class="ob-btn ben" onclick="chooseProfile('Ben')">👨 Ben</button>
-      <button class="ob-btn maman" onclick="chooseProfile('Maman')">👩 Maman</button>
-    </div>
+    <div class="ob-buttons"><button class="ob-btn ben" onclick="chooseProfile('Ben')">👨 Ben</button><button class="ob-btn maman" onclick="chooseProfile('Maman')">👩 Maman</button></div>
   </div>
 </div>
 <div class="header">
   <div class="header-top">
-    <div class="logo">🍼 BébéTrack <span class="sync-dot" id="syncDot" title="Synchronisé"></span></div>
-    <button class="current-user" id="currentUserBtn" onclick="switchUser()">
-      <span class="user-dot dot-ben" id="userDot"></span>
-      <span id="userLabel">Ben</span>
-    </button>
+    <div class="logo">🍼 BébéTrack <span class="sync-dot" id="syncDot"></span></div>
+    <button class="current-user" onclick="switchUser()"><span class="user-dot dot-ben" id="userDot"></span><span id="userLabel">Ben</span></button>
   </div>
-  <div class="baby-info">
-    <div class="baby-name" id="babyNameDisplay">👶 Bébé</div>
-    <div class="baby-age" id="babyAgeDisplay"></div>
-  </div>
+  <div class="baby-info"><div class="baby-name" id="babyNameDisplay">👶 Bébé</div><div class="baby-age" id="babyAgeDisplay"></div></div>
 </div>
 <div class="quick-actions">
   <button class="qa-btn" onclick="openModal('bottle')"><span class="qa-icon">🍼</span><span class="qa-label">Biberon</span></button>
   <button class="qa-btn" onclick="openModal('diaper')"><span class="qa-icon">🧷</span><span class="qa-label">Couche</span></button>
-  <button class="qa-btn" onclick="openModal('sleep')"><span class="qa-icon">😴</span><span class="qa-label">Dodo</span></button>
+  <button class="qa-btn" id="sleepQaBtn" onclick="handleSleepClick()"><span class="qa-icon">😴</span><span class="qa-label">Dodo</span><span class="qa-timer" id="qaSleepTimer"></span></button>
   <button class="qa-btn" onclick="openModal('note')"><span class="qa-icon">📝</span><span class="qa-label">Note</span></button>
 </div>
 <div class="stats" id="statsBar"></div>
+<!-- Sleep banner -->
+<div class="sleep-banner hidden" id="sleepBanner">
+  <div class="sleep-banner-icon">😴</div>
+  <div class="sleep-banner-body">
+    <div class="sleep-banner-title">Bébé dort…</div>
+    <div class="sleep-banner-timer" id="sleepTimerDisplay">00:00:00</div>
+    <div class="sleep-banner-start" id="sleepStartLabel">Début : --:--</div>
+  </div>
+  <button class="sleep-stop-btn" onclick="stopSleep()">Réveillé ☀️</button>
+</div>
 <div class="last-entry hidden" id="lastEntry">
   <span class="le-icon" id="leIcon"></span>
   <div class="le-body"><div class="le-title">Dernière entrée</div><div class="le-text" id="leText"></div><div class="le-sub" id="leSub"></div></div>
 </div>
-<div class="section-head">
-  <div class="section-title">🕐 Journal</div>
-  <div class="head-right"><span class="date-label" id="dateLabel"></span></div>
-</div>
+<div class="section-head"><div class="section-title">🕐 Journal</div><div class="head-right"><span class="date-label" id="dateLabel"></span></div></div>
 <div class="day-picker" id="dayPicker"></div>
 <div class="timeline" id="timeline"></div>
 </div>
@@ -160,15 +170,9 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 <!-- BOTTLE -->
 <div class="overlay" id="modal-bottle" onclick="closeOverlay(event,'modal-bottle')"><div class="modal">
   <div class="modal-handle"></div><div class="modal-title">🍼 Biberon</div>
-  <div class="form-row"><label class="form-label">Quantité bue (ml)</label>
-    <div class="amount-row"><button class="amt-btn" onclick="adjustAmt('bottle',-10)">−</button><div><span class="amt-val" id="bottleAmt">120</span><span class="amt-unit"> ml</span></div><button class="amt-btn" onclick="adjustAmt('bottle',10)">+</button></div>
-  </div>
-  <div class="form-row"><label class="form-label">Quantité préparée (ml)</label>
-    <div class="amount-row"><button class="amt-btn" onclick="adjustAmt('bottlePrep',-10)">−</button><div><span class="amt-val" id="bottlePrepAmt">120</span><span class="amt-unit"> ml</span></div><button class="amt-btn" onclick="adjustAmt('bottlePrep',10)">+</button></div>
-  </div>
-  <div class="form-row"><label class="form-label">Type de lait</label>
-    <select class="form-select" id="bottleType"><option>Lait maternel</option><option selected>Lait infantile</option><option>Mixte</option></select>
-  </div>
+  <div class="form-row"><label class="form-label">Quantité bue (ml)</label><div class="amount-row"><button class="amt-btn" onclick="adjustAmt('bottle',-10)">−</button><div><span class="amt-val" id="bottleAmt">120</span><span class="amt-unit"> ml</span></div><button class="amt-btn" onclick="adjustAmt('bottle',10)">+</button></div></div>
+  <div class="form-row"><label class="form-label">Quantité préparée (ml)</label><div class="amount-row"><button class="amt-btn" onclick="adjustAmt('bottlePrep',-10)">−</button><div><span class="amt-val" id="bottlePrepAmt">120</span><span class="amt-unit"> ml</span></div><button class="amt-btn" onclick="adjustAmt('bottlePrep',10)">+</button></div></div>
+  <div class="form-row"><label class="form-label">Type de lait</label><select class="form-select" id="bottleType"><option>Lait maternel</option><option selected>Lait infantile</option><option>Mixte</option></select></div>
   <div class="form-row"><label class="form-label">Heure</label><input type="time" class="form-input" id="bottleTime"></div>
   <div class="form-row"><label class="form-label">Note (optionnel)</label><input class="form-input" id="bottleNote" placeholder="Bien bu, régurgitation…"></div>
   <button class="submit-btn grad-bottle" onclick="saveEntry('bottle')">Enregistrer 🍼</button>
@@ -176,19 +180,15 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 <!-- DIAPER -->
 <div class="overlay" id="modal-diaper" onclick="closeOverlay(event,'modal-diaper')"><div class="modal">
   <div class="modal-handle"></div><div class="modal-title">🧷 Couche</div>
-  <div class="form-row"><label class="form-label">Type</label>
-    <select class="form-select" id="diaperType"><option>Pipi 💧</option><option>Caca 💩</option><option>Les deux 💧💩</option></select>
-  </div>
+  <div class="form-row"><label class="form-label">Type</label><select class="form-select" id="diaperType"><option>Pipi 💧</option><option>Caca 💩</option><option>Les deux 💧💩</option></select></div>
   <div class="form-row"><label class="form-label">Heure</label><input type="time" class="form-input" id="diaperTime"></div>
   <div class="form-row"><label class="form-label">Note</label><input class="form-input" id="diaperNote" placeholder="Éruption, couleur…"></div>
   <button class="submit-btn grad-diaper" onclick="saveEntry('diaper')">Enregistrer 🧷</button>
 </div></div>
-<!-- SLEEP -->
+<!-- SLEEP (manual entry) -->
 <div class="overlay" id="modal-sleep" onclick="closeOverlay(event,'modal-sleep')"><div class="modal">
-  <div class="modal-handle"></div><div class="modal-title">😴 Dodo</div>
-  <div class="form-row"><label class="form-label">Durée (minutes)</label>
-    <div class="amount-row"><button class="amt-btn" onclick="adjustAmt('sleep',-5)">−</button><div><span class="amt-val" id="sleepAmt">30</span><span class="amt-unit"> min</span></div><button class="amt-btn" onclick="adjustAmt('sleep',5)">+</button></div>
-  </div>
+  <div class="modal-handle"></div><div class="modal-title">😴 Ajouter un dodo manuellement</div>
+  <div class="form-row"><label class="form-label">Durée (minutes)</label><div class="amount-row"><button class="amt-btn" onclick="adjustAmt('sleep',-5)">−</button><div><span class="amt-val" id="sleepAmt">30</span><span class="amt-unit"> min</span></div><button class="amt-btn" onclick="adjustAmt('sleep',5)">+</button></div></div>
   <div class="form-row"><label class="form-label">Début</label><input type="time" class="form-input" id="sleepTime"></div>
   <div class="form-row"><label class="form-label">Note</label><input class="form-input" id="sleepNote" placeholder="Agité, paisible…"></div>
   <button class="submit-btn grad-sleep" onclick="saveEntry('sleep')">Enregistrer 😴</button>
@@ -199,6 +199,12 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
   <div class="form-row"><label class="form-label">Note</label><input class="form-input" id="noteText" placeholder="Température, médicament, poids…"></div>
   <div class="form-row"><label class="form-label">Heure</label><input type="time" class="form-input" id="noteTime"></div>
   <button class="submit-btn grad-note" onclick="saveEntry('note')">Enregistrer 📝</button>
+</div></div>
+<!-- SLEEP CHOICE -->
+<div class="overlay" id="modal-sleep-choice" onclick="closeOverlay(event,'modal-sleep-choice')"><div class="modal">
+  <div class="modal-handle"></div><div class="modal-title">😴 Dodo</div>
+  <button class="submit-btn grad-sleep" style="margin-bottom:12px" onclick="startSleep()">▶️ Démarrer le chrono dodo</button>
+  <button class="submit-btn" style="background:var(--white);color:var(--text);border:2px solid var(--border);box-shadow:none" onclick="closeAllModals();openModal('sleep')">✏️ Saisie manuelle</button>
 </div></div>
 <!-- SETTINGS -->
 <div class="overlay" id="modal-settings" onclick="closeOverlay(event,'modal-settings')"><div class="modal">
@@ -219,210 +225,222 @@ body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--text);m
 <script>
 // ===== FIREBASE =====
 firebase.initializeApp({
-  apiKey: "AIzaSyAfd5zy1OyaML9YK5Dl7GcgbXe2znoSjQo",
-  authDomain: "babyava.firebaseapp.com",
-  databaseURL: "https://babyava-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "babyava",
-  storageBucket: "babyava.firebasestorage.app",
-  messagingSenderId: "657856736814",
-  appId: "1:657856736814:web:1edef4fd528ceac9db39bf"
+  apiKey:"AIzaSyAfd5zy1OyaML9YK5Dl7GcgbXe2znoSjQo",authDomain:"babyava.firebaseapp.com",
+  databaseURL:"https://babyava-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"babyava",storageBucket:"babyava.firebasestorage.app",
+  messagingSenderId:"657856736814",appId:"1:657856736814:web:1edef4fd528ceac9db39bf"
 });
-const db = firebase.database();
+const db=firebase.database();
 
-// ===== STATE =====
-let entries = {};
-let settings = {};
-let currentParent = localStorage.getItem('bebetrack-parent') || '';
-let amts = { bottle: 120, bottlePrep: 120, sleep: 30 };
-const ICONS = { bottle:'🍼', diaper:'🧷', sleep:'😴', note:'📝' };
-const TITLES = { bottle:'Biberon', diaper:'Couche', sleep:'Dodo', note:'Note' };
+let entries={},settings={},currentParent=localStorage.getItem('bebetrack-parent')||'';
+let amts={bottle:120,bottlePrep:120,sleep:30};
+let sleepStartTs=null,sleepTimerInterval=null;
+const ICONS={bottle:'🍼',diaper:'🧷',sleep:'😴',note:'📝'};
+const TITLES={bottle:'Biberon',diaper:'Couche',sleep:'Dodo',note:'Note'};
 
-// ===== LOCAL DATE (no UTC!) =====
-function todayStr() {
-  const d = new Date();
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-}
-function localDateStr(date) {
-  return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
-}
-
-let selectedDate = todayStr();
+// ===== LOCAL DATE =====
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function nowTime(){return new Date().toTimeString().slice(0,5)}
+let selectedDate=todayStr();
 
 // ===== INIT =====
-function init() {
+function init(){
   setDateLabel();
-  if (currentParent) document.getElementById('onboarding').classList.add('hidden');
-  db.ref('entries').on('value', snap => { entries = snap.val() || {}; render(); });
-  db.ref('settings').on('value', snap => { settings = snap.val() || {}; applySettings(); });
+  if(currentParent)document.getElementById('onboarding').classList.add('hidden');
+  // Restore sleep timer from Firebase
+  db.ref('sleepTimer').on('value',snap=>{
+    const val=snap.val();
+    if(val&&val.startTs){
+      sleepStartTs=val.startTs;
+      startSleepUI();
+    } else {
+      sleepStartTs=null;
+      stopSleepUI();
+    }
+  });
+  db.ref('entries').on('value',snap=>{entries=snap.val()||{};render()});
+  db.ref('settings').on('value',snap=>{settings=snap.val()||{};applySettings()});
 }
 
-function chooseProfile(name) {
-  currentParent = name;
-  localStorage.setItem('bebetrack-parent', name);
-  document.getElementById('onboarding').classList.add('hidden');
-  render();
-}
-function switchUser() {
-  const m = settings.mamanName || 'Maman';
-  currentParent = currentParent === 'Ben' ? m : 'Ben';
-  localStorage.setItem('bebetrack-parent', currentParent);
-  updateUserUI(); showToast('👋 ' + currentParent, 'sleep');
-}
-function updateUserUI() {
-  document.getElementById('userLabel').textContent = currentParent;
-  document.getElementById('userDot').className = 'user-dot ' + (currentParent === 'Ben' ? 'dot-ben' : 'dot-maman');
+function chooseProfile(name){currentParent=name;localStorage.setItem('bebetrack-parent',name);document.getElementById('onboarding').classList.add('hidden');render()}
+function switchUser(){const m=settings.mamanName||'Maman';currentParent=currentParent==='Ben'?m:'Ben';localStorage.setItem('bebetrack-parent',currentParent);updateUserUI();showToast('👋 '+currentParent,'sleep')}
+function updateUserUI(){document.getElementById('userLabel').textContent=currentParent;document.getElementById('userDot').className='user-dot '+(currentParent==='Ben'?'dot-ben':'dot-maman')}
+
+function entriesArray(){return Object.keys(entries).map(k=>({...entries[k],key:k})).sort((a,b)=>(b.ts||0)-(a.ts||0))}
+function setDateLabel(){document.getElementById('dateLabel').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})}
+function setDefaultTimes(){const hm=nowTime();['bottleTime','diaperTime','sleepTime','noteTime'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=hm})}
+function calcAge(dob){const days=Math.floor((new Date()-new Date(dob+'T00:00:00'))/86400000);if(days<0)return'';if(days<31)return days+' jour'+(days>1?'s':'');const mo=Math.floor(days/30.44);if(mo<12)return mo+' mois';const y=Math.floor(mo/12),m=mo%12;return y+' an'+(y>1?'s':'')+(m>0?' et '+m+' mois':'')}
+
+// ===== SLEEP TIMER =====
+function handleSleepClick(){
+  if(sleepStartTs){
+    // Already sleeping — offer to stop
+    stopSleep();
+  } else {
+    openModal('sleep-choice');
+  }
 }
 
-// ===== HELPERS =====
-function entriesArray() {
-  return Object.keys(entries).map(k => ({ ...entries[k], key: k })).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+function startSleep(){
+  closeAllModals();
+  const now=Date.now();
+  db.ref('sleepTimer').set({startTs:now,parent:currentParent});
+  showToast('😴 Dodo démarré !','sleep');
 }
-function setDateLabel() {
-  document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+function startSleepUI(){
+  document.getElementById('sleepBanner').classList.remove('hidden');
+  document.getElementById('sleepQaBtn').classList.add('sleeping');
+  const startDate=new Date(sleepStartTs);
+  document.getElementById('sleepStartLabel').textContent='Début : '+startDate.toTimeString().slice(0,5);
+  clearInterval(sleepTimerInterval);
+  updateSleepDisplay();
+  sleepTimerInterval=setInterval(updateSleepDisplay,1000);
 }
-function setDefaultTimes() {
-  const hm = new Date().toTimeString().slice(0, 5);
-  ['bottleTime', 'diaperTime', 'sleepTime', 'noteTime'].forEach(id => { const el = document.getElementById(id); if (el) el.value = hm; });
+
+function updateSleepDisplay(){
+  if(!sleepStartTs)return;
+  const elapsed=Math.floor((Date.now()-sleepStartTs)/1000);
+  const h=Math.floor(elapsed/3600),m=Math.floor((elapsed%3600)/60),s=elapsed%60;
+  const display=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('sleepTimerDisplay').textContent=display;
+  const qaTimer=document.getElementById('qaSleepTimer');
+  if(qaTimer)qaTimer.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
 }
-function calcAge(dob) {
-  const days = Math.floor((new Date() - new Date(dob + 'T00:00:00')) / 86400000);
-  if (days < 0) return '';
-  if (days < 31) return days + ' jour' + (days > 1 ? 's' : '');
-  const mo = Math.floor(days / 30.44);
-  if (mo < 12) return mo + ' mois';
-  const y = Math.floor(mo / 12), m = mo % 12;
-  return y + ' an' + (y > 1 ? 's' : '') + (m > 0 ? ' et ' + m + ' mois' : '');
+
+function stopSleep(){
+  if(!sleepStartTs)return;
+  const startTs=sleepStartTs;
+  const elapsed=Math.floor((Date.now()-startTs)/1000);
+  const minutes=Math.max(1,Math.round(elapsed/60));
+  const startDate=new Date(startTs);
+  const h=Math.floor(minutes/60),m=minutes%60;
+  const label=(h>0?h+'h':'')+(m>0?m+'min':'');
+  const startTime=startDate.toTimeString().slice(0,5);
+
+  const entry={
+    type:'sleep',parent:currentParent,date:todayStr(),ts:Date.now(),
+    duration:minutes,time:startTime,note:'',
+    label:label+' (chrono)'
+  };
+  db.ref('entries').push(entry);
+  db.ref('sleepTimer').remove();
+  showToast('☀️ Dodo terminé — '+label,'sleep');
+}
+
+function stopSleepUI(){
+  document.getElementById('sleepBanner').classList.add('hidden');
+  document.getElementById('sleepQaBtn').classList.remove('sleeping');
+  document.getElementById('qaSleepTimer').textContent='';
+  clearInterval(sleepTimerInterval);
 }
 
 // ===== RENDER =====
-function render() {
-  if (!currentParent) return;
-  applySettings(); updateUserUI(); renderDayPicker(); renderStats(); renderTimeline(); renderLastEntry(); setDefaultTimes();
+function render(){
+  if(!currentParent)return;
+  applySettings();updateUserUI();renderDayPicker();renderStats();renderTimeline();renderLastEntry();setDefaultTimes();
 }
-function applySettings() {
-  document.getElementById('babyNameDisplay').textContent = '👶 ' + (settings.babyName || 'Bébé');
-  document.getElementById('babyAgeDisplay').textContent = settings.babyDob ? calcAge(settings.babyDob) : '';
-  document.getElementById('setBabyName').value = settings.babyName || '';
-  document.getElementById('setBabyDob').value = settings.babyDob || '';
-  document.getElementById('setMamanName').value = settings.mamanName || '';
+function applySettings(){
+  document.getElementById('babyNameDisplay').textContent='👶 '+(settings.babyName||'Bébé');
+  document.getElementById('babyAgeDisplay').textContent=settings.babyDob?calcAge(settings.babyDob):'';
+  document.getElementById('setBabyName').value=settings.babyName||'';
+  document.getElementById('setBabyDob').value=settings.babyDob||'';
+  document.getElementById('setMamanName').value=settings.mamanName||'';
 }
-function renderDayPicker() {
-  const picker = document.getElementById('dayPicker');
-  const all = entriesArray();
-  const dates = [...new Set(all.map(e => e.date))].sort().reverse();
-  const today = todayStr();
-  if (!dates.includes(today)) dates.unshift(today);
-  else { dates.splice(dates.indexOf(today), 1); dates.unshift(today); }
-  const show = dates.slice(0, 20);
-  picker.innerHTML = show.map(d => {
-    // Parse date parts manually to avoid timezone issues
-    const [y, m, day] = d.split('-').map(Number);
-    const dt = new Date(y, m - 1, day);
-    const label = d === today ? "Aujourd'hui" : dt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const count = all.filter(e => e.date === d).length;
-    return `<button class="day-chip ${d === selectedDate ? 'active' : ''}" onclick="selectDay('${d}')">${label}${count ? ' (' + count + ')' : ''}</button>`;
+function renderDayPicker(){
+  const picker=document.getElementById('dayPicker');const all=entriesArray();
+  const dates=[...new Set(all.map(e=>e.date))].sort().reverse();const today=todayStr();
+  if(!dates.includes(today))dates.unshift(today);else{dates.splice(dates.indexOf(today),1);dates.unshift(today)}
+  picker.innerHTML=dates.slice(0,20).map(d=>{
+    const [y,m,day]=d.split('-').map(Number);const dt=new Date(y,m-1,day);
+    const label=d===today?"Aujourd'hui":dt.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+    const count=all.filter(e=>e.date===d).length;
+    return `<button class="day-chip ${d===selectedDate?'active':''}" onclick="selectDay('${d}')">${label}${count?' ('+count+')':''}</button>`;
   }).join('');
 }
-function selectDay(d) { selectedDate = d; renderStats(); renderTimeline(); renderDayPicker(); }
-
-function renderStats() {
-  const te = entriesArray().filter(e => e.date === selectedDate);
-  const bottles = te.filter(e => e.type === 'bottle');
-  const ml = bottles.reduce((s, e) => s + (e.amount || 0), 0);
-  const diapers = te.filter(e => e.type === 'diaper').length;
-  const sleep = te.filter(e => e.type === 'sleep').reduce((s, e) => s + (e.duration || 0), 0);
-  const h = Math.floor(sleep / 60), m = sleep % 60;
-  document.getElementById('statsBar').innerHTML = `
+function selectDay(d){selectedDate=d;renderStats();renderTimeline();renderDayPicker()}
+function renderStats(){
+  const te=entriesArray().filter(e=>e.date===selectedDate);
+  const bottles=te.filter(e=>e.type==='bottle'),ml=bottles.reduce((s,e)=>s+(e.amount||0),0);
+  const diapers=te.filter(e=>e.type==='diaper').length;
+  const sleep=te.filter(e=>e.type==='sleep').reduce((s,e)=>s+(e.duration||0),0);
+  const h=Math.floor(sleep/60),m=sleep%60;
+  document.getElementById('statsBar').innerHTML=`
     <div class="stat-card"><div class="stat-val clr-bottle">${bottles.length}</div><div class="stat-label">Biberons</div></div>
     <div class="stat-card"><div class="stat-val clr-bottle">${ml}</div><div class="stat-label">ml bu</div></div>
     <div class="stat-card"><div class="stat-val clr-diaper">${diapers}</div><div class="stat-label">Couches</div></div>
-    <div class="stat-card"><div class="stat-val clr-sleep">${(h > 0 ? h + 'h' : '') + (m > 0 ? m + 'm' : (h === 0 ? '0' : ''))}</div><div class="stat-label">Sommeil</div></div>`;
+    <div class="stat-card"><div class="stat-val clr-sleep">${(h>0?h+'h':'')+(m>0?m+'m':(h===0?'0':''))}</div><div class="stat-label">Sommeil</div></div>`;
 }
-function renderLastEntry() {
-  const le = document.getElementById('lastEntry');
-  const all = entriesArray();
-  if (!all.length) { le.classList.add('hidden'); return; }
-  const last = all[0]; le.classList.remove('hidden');
-  document.getElementById('leIcon').textContent = ICONS[last.type];
-  document.getElementById('leText').textContent = last.label || TITLES[last.type];
-  document.getElementById('leSub').textContent = (last.time || '') + ' — par ' + (last.parent || '?');
+function renderLastEntry(){
+  const le=document.getElementById('lastEntry');const all=entriesArray();
+  if(!all.length){le.classList.add('hidden');return}
+  const last=all[0];le.classList.remove('hidden');
+  document.getElementById('leIcon').textContent=ICONS[last.type];
+  document.getElementById('leText').textContent=last.label||TITLES[last.type];
+  document.getElementById('leSub').textContent=(last.time||'')+' — par '+(last.parent||'?');
 }
-function renderTimeline() {
-  const tl = document.getElementById('timeline');
-  const te = entriesArray().filter(e => e.date === selectedDate).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-  if (!te.length) { tl.innerHTML = '<div class="tl-empty">Aucune entrée ce jour 🌙</div>'; return; }
-  tl.innerHTML = te.map(e => `
-    <div class="tl-item">
-      <div class="tl-icon bg-${e.type}">${ICONS[e.type]}</div>
-      <div class="tl-body">
-        <div class="tl-title">${TITLES[e.type]}</div>
-        <div class="tl-detail">${e.label || ''}${e.note && e.type !== 'note' ? ' · ' + e.note : ''}</div>
-        <div class="tl-meta">
-          <span class="tl-time">${e.time || ''}</span>
-          <span class="tl-parent ${e.parent === 'Ben' ? 'par-ben' : 'par-maman'}">${e.parent}</span>
-        </div>
-      </div>
-      <button class="tl-delete" onclick="deleteEntry('${e.key}')">✕</button>
+function renderTimeline(){
+  const tl=document.getElementById('timeline');
+  const te=entriesArray().filter(e=>e.date===selectedDate).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  if(!te.length){tl.innerHTML='<div class="tl-empty">Aucune entrée ce jour 🌙</div>';return}
+  tl.innerHTML=te.map(e=>`
+    <div class="tl-item"><div class="tl-icon bg-${e.type}">${ICONS[e.type]}</div>
+      <div class="tl-body"><div class="tl-title">${TITLES[e.type]}</div>
+        <div class="tl-detail">${e.label||''}${e.note&&e.type!=='note'?' · '+e.note:''}</div>
+        <div class="tl-meta"><span class="tl-time">${e.time||''}</span><span class="tl-parent ${e.parent==='Ben'?'par-ben':'par-maman'}">${e.parent}</span></div>
+      </div><button class="tl-delete" onclick="deleteEntry('${e.key}')">✕</button>
     </div>`).join('');
 }
 
 // ===== AMOUNTS =====
-function adjustAmt(type, delta) {
-  amts[type] = Math.max(0, (amts[type] || 0) + delta);
-  const el = document.getElementById(type + 'Amt'); if (el) el.textContent = amts[type];
-}
+function adjustAmt(type,delta){amts[type]=Math.max(0,(amts[type]||0)+delta);const el=document.getElementById(type+'Amt');if(el)el.textContent=amts[type]}
 
 // ===== SAVE =====
-function saveEntry(type) {
-  const entry = { type, parent: currentParent, date: todayStr(), ts: Date.now() };
-  if (type === 'bottle') {
-    entry.amount = amts.bottle; entry.prepared = amts.bottlePrep;
-    entry.milkType = document.getElementById('bottleType').value;
-    entry.time = document.getElementById('bottleTime').value;
-    entry.note = document.getElementById('bottleNote').value;
-    entry.label = amts.bottle + ' ml' + (amts.bottlePrep > 0 ? ' / ' + amts.bottlePrep + ' ml préparés' : '') + ' · ' + entry.milkType;
-  } else if (type === 'diaper') {
-    entry.diaperType = document.getElementById('diaperType').value;
-    entry.time = document.getElementById('diaperTime').value;
-    entry.note = document.getElementById('diaperNote').value;
-    entry.label = entry.diaperType;
-  } else if (type === 'sleep') {
-    entry.duration = amts.sleep; entry.time = document.getElementById('sleepTime').value;
-    entry.note = document.getElementById('sleepNote').value;
-    const h = Math.floor(amts.sleep / 60), m = amts.sleep % 60;
-    entry.label = (h > 0 ? h + 'h' : '') + (m > 0 ? m + 'min' : '');
-  } else if (type === 'note') {
-    entry.note = document.getElementById('noteText').value;
-    entry.time = document.getElementById('noteTime').value;
-    entry.label = entry.note || 'Note';
+function saveEntry(type){
+  const entry={type,parent:currentParent,date:todayStr(),ts:Date.now()};
+  if(type==='bottle'){
+    entry.amount=amts.bottle;entry.prepared=amts.bottlePrep;
+    entry.milkType=document.getElementById('bottleType').value;
+    entry.time=document.getElementById('bottleTime').value;
+    entry.note=document.getElementById('bottleNote').value;
+    entry.label=amts.bottle+' ml'+(amts.bottlePrep>0?' / '+amts.bottlePrep+' ml préparés':'')+' · '+entry.milkType;
+  }else if(type==='diaper'){
+    entry.diaperType=document.getElementById('diaperType').value;
+    entry.time=document.getElementById('diaperTime').value;
+    entry.note=document.getElementById('diaperNote').value;
+    entry.label=entry.diaperType;
+  }else if(type==='sleep'){
+    entry.duration=amts.sleep;entry.time=document.getElementById('sleepTime').value;
+    entry.note=document.getElementById('sleepNote').value;
+    const h=Math.floor(amts.sleep/60),m=amts.sleep%60;
+    entry.label=(h>0?h+'h':'')+(m>0?m+'min':'');
+  }else if(type==='note'){
+    entry.note=document.getElementById('noteText').value;
+    entry.time=document.getElementById('noteTime').value;
+    entry.label=entry.note||'Note';
   }
   db.ref('entries').push(entry);
-  closeAllModals(); selectedDate = todayStr();
-  ['bottleNote', 'diaperNote', 'sleepNote', 'noteText'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  showToast(ICONS[type] + ' Enregistré !', type);
+  closeAllModals();selectedDate=todayStr();
+  ['bottleNote','diaperNote','sleepNote','noteText'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  showToast(ICONS[type]+' Enregistré !',type);
 }
-function deleteEntry(key) { db.ref('entries/' + key).remove(); }
+function deleteEntry(key){db.ref('entries/'+key).remove()}
 
 // ===== SETTINGS =====
-function saveSettings() {
-  db.ref('settings').set({
-    babyName: document.getElementById('setBabyName').value.trim(),
-    babyDob: document.getElementById('setBabyDob').value,
-    mamanName: document.getElementById('setMamanName').value.trim()
-  });
-  closeAllModals(); showToast('✓ Sauvegardé', 'sleep');
+function saveSettings(){
+  db.ref('settings').set({babyName:document.getElementById('setBabyName').value.trim(),babyDob:document.getElementById('setBabyDob').value,mamanName:document.getElementById('setMamanName').value.trim()});
+  closeAllModals();showToast('✓ Sauvegardé','sleep');
 }
-function clearAllData() {
-  if (confirm('Effacer toutes les données ? Irréversible !')) {
-    db.ref('entries').remove();
-    try { db.ref('seeded').remove(); } catch(e) {}
-    closeAllModals(); showToast('🗑️ Effacé', 'note');
+function clearAllData(){
+  if(confirm('Effacer toutes les données ? Irréversible !')){
+    db.ref('entries').remove();db.ref('seeded').remove();db.ref('sleepTimer').remove();
+    closeAllModals();showToast('🗑️ Effacé','note');
   }
 }
 
-// ===== SEED HISTORY =====
-function seedHistoricalData() {
-  const raw = `24/02/2026|08:30|35|40
+// ===== SEED HISTORY (2026) =====
+function seedHistoricalData(){
+const raw=`24/02/2026|08:30|35|40
 24/02/2026|11:00|40|40
 24/02/2026|13:50|40|40
 24/02/2026|16:20|40|40
@@ -821,60 +839,49 @@ function seedHistoricalData() {
 13/04/2026|09:25|90|0
 13/04/2026|13:00|120|0
 13/04/2026|17:00|120|0`;
-
-  const updates = {};
-  raw.split('\n').forEach((line, i) => {
-    const [dateStr, time, drunkStr, prepStr] = line.split('|');
-    const [d, m, y] = dateStr.split('/');
-    const date = y + '-' + m + '-' + d;
-    const drunk = parseInt(drunkStr) || 0;
-    const prep = parseInt(prepStr) || 0;
-    let label = drunk + ' ml';
-    if (prep > 0) label += ' / ' + prep + ' ml préparés';
-    label += ' · Lait infantile';
-    // Use local timestamp (not UTC)
-    const [hh, mm] = time.split(':').map(Number);
-    const localTs = new Date(parseInt(y), parseInt(m)-1, parseInt(d), hh, mm).getTime();
-    const key = 'h_' + date.replace(/-/g, '') + '_' + time.replace(':', '') + '_' + i;
-    updates[key] = { type:'bottle', parent:'Ben', date, time, amount:drunk, prepared:prep, milkType:'Lait infantile', note:'', label, ts:localTs };
+  const updates={};
+  raw.split('\n').forEach((line,i)=>{
+    const[dateStr,time,drunkStr,prepStr]=line.split('|');
+    const[d,m,y]=dateStr.split('/');const date=y+'-'+m+'-'+d;
+    const drunk=parseInt(drunkStr)||0,prep=parseInt(prepStr)||0;
+    let label=drunk+' ml';if(prep>0)label+=' / '+prep+' ml préparés';label+=' · Lait infantile';
+    const[hh,mm]=time.split(':').map(Number);
+    const localTs=new Date(parseInt(y),parseInt(m)-1,parseInt(d),hh,mm).getTime();
+    const key='h_'+date.replace(/-/g,'')+'_'+time.replace(':','')+'_'+i;
+    updates[key]={type:'bottle',parent:'Ben',date,time,amount:drunk,prepared:prep,milkType:'Lait infantile',note:'',label,ts:localTs};
   });
   db.ref('entries').update(updates);
   db.ref('seeded').set(true);
-  showToast('📊 Historique importé !', 'bottle');
+  showToast('📊 Historique importé !','bottle');
 }
-
-db.ref('seeded').once('value', snap => { if (!snap.val()) seedHistoricalData(); });
+db.ref('seeded').once('value',snap=>{if(!snap.val())seedHistoricalData()});
 
 // ===== HISTORY =====
-function renderHistory() {
-  const c = document.getElementById('historyContent');
-  const all = entriesArray();
-  const days = {};
-  all.forEach(e => { if (!days[e.date]) days[e.date] = []; days[e.date].push(e); });
-  const sorted = Object.keys(days).sort().reverse().slice(0, 30);
-  if (!sorted.length) { c.innerHTML = '<div class="tl-empty">Pas de données.</div>'; return; }
-  c.innerHTML = sorted.map(day => {
-    const de = days[day]; const b = de.filter(e => e.type === 'bottle');
-    const ml = b.reduce((s, e) => s + (e.amount || 0), 0);
-    const d = de.filter(e => e.type === 'diaper').length;
-    const sl = de.filter(e => e.type === 'sleep').reduce((s, e) => s + (e.duration || 0), 0);
-    const sh = Math.floor(sl / 60), sm = sl % 60;
-    const [yy, mm, dd] = day.split('-').map(Number);
-    const label = new Date(yy, mm-1, dd).toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
-    return `<div class="hist-day"><div class="hist-date">${label}</div><div class="hist-stats"><span>🍼 ${b.length} bib (${ml}ml)</span><span>🧷 ${d}</span><span>😴 ${sh > 0 ? sh + 'h' : ''}${sm}min</span></div></div>`;
+function renderHistory(){
+  const c=document.getElementById('historyContent');const all=entriesArray();
+  const days={};all.forEach(e=>{if(!days[e.date])days[e.date]=[];days[e.date].push(e)});
+  const sorted=Object.keys(days).sort().reverse().slice(0,30);
+  if(!sorted.length){c.innerHTML='<div class="tl-empty">Pas de données.</div>';return}
+  c.innerHTML=sorted.map(day=>{
+    const de=days[day],b=de.filter(e=>e.type==='bottle'),ml=b.reduce((s,e)=>s+(e.amount||0),0);
+    const d=de.filter(e=>e.type==='diaper').length;
+    const sl=de.filter(e=>e.type==='sleep').reduce((s,e)=>s+(e.duration||0),0);
+    const sh=Math.floor(sl/60),sm=sl%60;
+    const[yy,mm,dd]=day.split('-').map(Number);
+    const label=new Date(yy,mm-1,dd).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    return `<div class="hist-day"><div class="hist-date">${label}</div><div class="hist-stats"><span>🍼 ${b.length} bib (${ml}ml)</span><span>🧷 ${d}</span><span>😴 ${sh>0?sh+'h':''}${sm}min</span></div></div>`;
   }).join('');
 }
 
 // ===== MODALS =====
-function openModal(type) { if (type === 'history') renderHistory(); setDefaultTimes(); document.getElementById('modal-' + type).classList.add('open'); }
-function closeAllModals() { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
-function closeOverlay(e, id) { if (e.target === document.getElementById(id)) closeAllModals(); }
-function selectNav(btn) { document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  const g = { bottle:'linear-gradient(135deg,var(--sky-dark),var(--sky))', diaper:'linear-gradient(135deg,var(--mint-dark),var(--mint))', sleep:'linear-gradient(135deg,var(--lav-dark),var(--lav))', note:'linear-gradient(135deg,#D4913A,var(--peach))' };
-  t.style.background = g[type] || g.sleep; t.textContent = msg;
-  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200);
+function openModal(type){if(type==='history')renderHistory();setDefaultTimes();document.getElementById('modal-'+type).classList.add('open')}
+function closeAllModals(){document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('open'))}
+function closeOverlay(e,id){if(e.target===document.getElementById(id))closeAllModals()}
+function selectNav(btn){document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  const g={bottle:'linear-gradient(135deg,var(--sky-dark),var(--sky))',diaper:'linear-gradient(135deg,var(--mint-dark),var(--mint))',sleep:'linear-gradient(135deg,var(--lav-dark),var(--lav))',note:'linear-gradient(135deg,#D4913A,var(--peach))'};
+  t.style.background=g[type]||g.sleep;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);
 }
 init();
 </script>
